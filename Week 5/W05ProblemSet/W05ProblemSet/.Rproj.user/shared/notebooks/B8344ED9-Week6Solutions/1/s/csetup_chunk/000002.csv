@@ -1,0 +1,21 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"0","library(nycflights13)"
+"0","library(Lock5Data)"
+"0","library(tidyverse)"
+"0","library(lubridate) "
+"2","
+Attaching package: ‘lubridate’
+
+"
+"2","The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+"
+"0","# Read data"
+"0","chicago <- readRDS(""chicago.rds"")"
+"0",""
+"0","# Modify StudentSurvey"
+"0","StudentSurvey <- StudentSurvey %>%"
+"0","  rowid_to_column(""ID"") %>%"
+"0","  select(ID, everything())"

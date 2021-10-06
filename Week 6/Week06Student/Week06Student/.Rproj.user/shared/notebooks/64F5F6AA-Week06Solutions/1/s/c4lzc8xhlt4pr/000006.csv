@@ -1,0 +1,5 @@
+"0",""
+"0",""
+"0","powers %>%"
+"0","  count(hero_names) %>%"
+"0","  filter(n > 1)"

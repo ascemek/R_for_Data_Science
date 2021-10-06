@@ -1,0 +1,155 @@
+---
+title: "Untitled"
+author: "R for Data Science"
+date: "9/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+```
+
+## Getting started
+
+Add the code to load the Lock5Data and tidyverse packages in the code chunk at the start of this document. 
+
+Please remember not to print data sets unless a question specifically asks you to. 
+
+
+## EE1 Tidy data
+
+Consider the following data containing a log of the number of different hawks observed at a hawk blind. 
+
+```{r}
+hawk_data <- tribble(
+  ~Species, ~Adult, ~Immature,
+  "Cooper",      32,      38, 
+  "Red-Tailed",  123,    454, 
+  "Sharp-shinned", 69,   192
+)
+hawk_data
+```
+
+
+a. Explain why this is not "tidy data". To fix it, do we need to make it wider or longer? What are the variables? 
+
+__Your answer:__
+
+
+
+b. Use the appropriate code to make the data tidy (longer). Print the tidy data set. 
+
+```{r}
+
+```
+
+
+
+## EE 2 Data import excel
+
+Find the spreadsheet of data on all 50 US states, "us_state.xlsx" included in the Week05Exercises folder. Open the spreadsheet in Excel (or numbers) and explore its structure.
+
+Write code to import the 2011 data, making sure that NA values are treated appropriately. Create a histogram of the percentage of residents who have competed in a physical activity in past month (`PhysicalActivity`).
+
+```{r}
+
+```
+
+## EE3 Tidy data visualization
+
+Consider the data `CityTemps` in the Lock5Data package. This data contains mean monthly temperatures in degrees Celsius for the years 2014 and 2015 in each of three cities.
+
+```{r}
+head(CityTemps)
+```
+
+a. I'd like to make side-by-side boxplots of the temperatures in all three cities. I want the boxplots to all be on the same scale, in the same graph. Is it possible to do this with the data in its current form? If so, please do so. If not, explain why not.
+
+__Your Answer:__ 
+
+```{r}
+
+```
+
+
+b. Let's try to tidy the data. I'd like to have a longer data set, which includes the columns Year, Month, City, Temperature. It would look something like this:
+
+| Year | Month | City          | Temperature |
+|------|-------|---------------|-------------|
+| 2014 | 1     | Moscow        | -8.6        |
+| 2014 | 1     | Melbourne     | 22          |
+| 2014 | 1     | San.Francisco | 12.8        |
+| 2014 | 2     | Moscow        | -1.9        |
+| ...  | ...   | ...           | ...         |
+
+Write the code to restructure CityTemps into this tidy form. Save the data as `TidyTemps`
+
+
+__Your Answer:__ 
+
+```{r}
+
+```
+
+
+c. Use your new TidyTemps data to make side-by-side boxplots of the temperatures in all three cities. 
+
+__Your Answer:__ 
+
+```{r}
+
+```
+
+
+d. What if you wanted to make a scatterplot of the Moscow temperatures and the San Francisco temperatures? Which data set (CityTemps or TidyTemps) would be more useful? Write the code to create this scatterplot. 
+
+
+__Your Answer:__ 
+
+```{r}
+
+```
+
+
+
+
+
+## EE4 book exercise from R4DS Ch 12
+
+What would happen if you widen this table? Why? How could you add a new column to uniquely identify each value?
+
+```{r}
+people <- tribble(
+  ~name,             ~key,    ~value,
+  #-----------------|--------|------
+  "Phillip Woods",   "age",       45,
+  "Phillip Woods",   "height",   186,
+  "Phillip Woods",   "age",       50,
+  "Jessica Cordero", "age",       37,
+  "Jessica Cordero", "height",   156
+)
+
+```
+
+
+## EE 5 Messy data import messages
+
+Suppose you realize at this point that you are going to need the chicago csv for this assignment. You also decide you want to use the `mosaic` package to help explore this data (FYI, I'm a big fan of the `favstats()` function in that package). 
+
+a. Write the code in the code chunk below to load the mosaic package and import the chicago data. Then use favstats() to create a summary of the daily temperature `tempd` (code included; just un-comment it). 
+
+```{r}
+
+favstats(~tmpd, data = chicago)
+```
+
+
+b. Knit the document and describe the output from your previous code chunk.
+
+
+__Your answer:__
+
+
+c. Explore [chunk options](https://rmarkdown.rstudio.com/lesson-3.html) that would let you clean up the output. Change the chunk options in the code chunk in part a. Knit the document again and verify that there are no messages, warnings, etc. from R when you import your data.  You don't need to write anything for this question; just change the chunk options in part a. 

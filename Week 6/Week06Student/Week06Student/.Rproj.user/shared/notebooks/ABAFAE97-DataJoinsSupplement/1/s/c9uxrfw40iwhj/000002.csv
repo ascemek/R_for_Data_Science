@@ -1,0 +1,3 @@
+"0","# Gets rid of hidden white space that prevents matches"
+"0","BaseballHits2019$Team <- trimws(BaseballHits2019$Team)"
+"0","BaseballSalaries2019$Team <- trimws(BaseballSalaries2019$Team)"

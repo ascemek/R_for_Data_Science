@@ -1,0 +1,8 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"0","library(Lock5Data)"
+"0","library(tidyverse)"
+"0",""
+"0","citytemp_long <- CityTemps %>%"
+"0","  pivot_longer(c(""Moscow"", ""Melbourne"", ""San.Francisco""), "
+"0","               names_to = ""City"", "
+"0","               values_to = ""Temperature"")"

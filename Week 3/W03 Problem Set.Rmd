@@ -1,0 +1,135 @@
+---
+title: "W03 Problem Set"
+class: "R for Data Science"
+author: "Sami Cemek"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(Lock5Data) # may need to install this package in the console
+
+# Set up HollywoodMovies data-- you don't need to understand this code. We will learn how to do this later on.
+
+HollywoodMovies <- HollywoodMovies %>%
+  mutate(BudgetSize = factor(case_when(Budget <=20 ~ "Small", 
+                                Budget <= 70 ~ "Medium", 
+                                Budget > 70 ~ "Large"), 
+                             levels = c("Small", "Medium", "Large")))
+```
+
+# Introduction
+
+This week we will use R to explore Hollywood Movies. Our data set contains information on 1295 movies released in Hollywood between 2012 and 2018.
+
+I've modified the data set slightly using skills we will practice next week in order to create additional options when visualizing the data. 
+
+```{r}
+str(HollywoodMovies)
+```
+
+#### PS1 Budget
+
+Use an appropriate graph or graphs to show the distribution of budgets for Hollywood movies. Modify the title, labels, colors, bins, and themes on your graph(s) to make them "publication ready" (ie something you'd be willing to share in a presentation or news article). 
+
+Intermediate/Advanced: annotate the graph to add information about any outliers or unusual features. 
+
+
+```{r}
+library(ggthemes)
+#x axis suppose to be the quantitative variable
+ggplot(HollywoodMovies, aes(x=Budget)) + geom_histogram(binwidth = 5, color="pink") + labs(x = "Hollywood Movie's Budget", y = "Number of Movies", title = "Hollywood Movie's Budget Histogram ") + theme_solarized()
+```
+
+
+
+<br> <br>
+
+#### PS2 Budget by Genre
+
+We'd like to explore the distribution of budget by genre, but there are a lot of different genres here, and some genres only have a few movies. Modify the data set to only include the 5 most frequently occuring genres; save this as a new data set called PopularGenres. Then use boxplots to show the distribution of budgets in each genre. Write a couple sentences about what you've found by visualizing the data. 
+
+Intermediate/Advanced: Customize the graph theme, colors, labels, etc. and add a red line showing the overall median budget for the PopularGenres data set.
+
+```{r}
+#part 1
+PopularGenres <- names(sort(table(HollywoodMovies$Genre), decreasing=TRUE)[1:5])
+PopularGenres
+#part2
+top5genre <- HollywoodMovies %>% filter(Genre %in% PopularGenres)
+#part3
+ggplot(top5genre, aes(x=Genre, y=Budget)) + geom_boxplot()
+```
+
+__Your interpretation:__ Write a couple sentences about what you've found by visualizing the data.  
+
+
+We found the 5 most frequently occuring genres are: Action,Adventure,Comedy,Drama and Thriller.
+- The action genre has one outlier. The median is around 100 million. The lower quartile is around 47 and the higher quartile is around 155 million.
+- The adventure genre has no outlier. The median is around 100 million. The lower quartile is around 50 and the higher quartile is around 155 million.
+- The comedy genre has three outliers. The median is around 25 million. The lower quartile is around 20 and the higher quartile is around 30 million.
+- The drama genre has multiple outliers. The median is around 23 million. The lower quartile is around 20 and the higher quartile is around 28 million.
+- The thriller genre has multiple outliers. The median is around 25 million. The lower quartile is around 20 and the higher quartile is around 45 million.
+We can see that Action and Adventure genres have more budget most of the times than other three genres. Comedy, Drama, and Thriller have more outliers than other two genres.
+
+<br> <br>
+
+#### PS3 Movie Popularity
+
+Do movies with higher critic reviews also get higher ratings from audiences? Create a scatterplot using the PopularGenres data to show the association between Rotten Tomatoes critic rating and the Audience rating, paying attention to how genre may (or may not) affect the results. 
+
+Intermediate: Explore additional options and graphs to see how *both* genre and budget may be linked to movie profitability, as well as other variables like worldwide gross. You may need to create multiple visualizations to see if there are any patterns, but focus on 2 visualizations to highlight what you found or didn't find. 
+
+
+```{r}
+ggplot(top5genre, aes(x=AudienceScore, y=RottenTomatoes, color = Genre)) + labs(title = "Audience Score vs Rotten Tomatoes") + geom_point()
+#Since we are using PopularGenres data, we will see the distribution for the top 5 genres. 
+```
+
+
+
+<br> <br>
+
+#### PS4 R4DS textbook exercise
+
+Complete [Exercise 6 in R4DS Section 3.6](https://r4ds.had.co.nz/data-visualisation.html#exercises-3).  
+
+Show your code to create each of the 6 graphs here: 
+
+```{r}
+# Top left
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = 4)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+
+# Top right
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy, size = 4)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy, fill = drv),show.legend = FALSE , se = FALSE)
+
+# Middle left'
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy, size = 4, color = drv)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy, fill = drv),show.legend = FALSE , se = FALSE)
+
+# Middle right
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = 4, color = drv)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+
+# Bottom left
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = 4, color = drv)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy, linetype = drv))
+
+# Bottom right
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, size = 4)) +
+  geom_smooth(mapping = aes(x = displ, y = hwy))
+
+```
+
+
+

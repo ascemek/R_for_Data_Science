@@ -1,0 +1,5 @@
+"0",""
+"0","heroes %>% group_by(name) %>%"
+"0","  mutate(num_times = n()) %>%"
+"0","  select(name, num_times, Publisher) %>%"
+"0","  filter(num_times > 1)"

@@ -1,0 +1,4 @@
+"0","small_heroes %>%"
+"0","  left_join(publishers)"
+"2","Joining, by = ""publisher""
+"

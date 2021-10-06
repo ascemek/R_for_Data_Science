@@ -1,0 +1,32 @@
+{
+    "id": "09538DB8",
+    "path": null,
+    "project_path": null,
+    "type": "r_dataframe",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1600982354823.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "expression": "CityTemps",
+        "caption": "CityTemps",
+        "totalObservations": 24,
+        "displayedObservations": 24,
+        "variables": 5,
+        "cacheKey": "6F68EBC9",
+        "object": "CityTemps",
+        "environment": "package:Lock5Data",
+        "contentUrl": "grid_resource/gridviewer.html?env=package%3ALock5Data&obj=CityTemps&cache_key=6F68EBC9&max_cols=50",
+        "preview": 0
+    },
+    "folds": "",
+    "lastKnownWriteTime": 7946994499412193893,
+    "encoding": "",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1600982354823,
+    "read_only": false,
+    "read_only_alternatives": []
+}

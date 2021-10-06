@@ -1,0 +1,5 @@
+"0",""
+"0","us_state <- read_excel(""us_state.xlsx"", sheet = ""2011"", na = ""-999"", skip = 2)"
+"0",""
+"0","ggplot(us_state, aes(x = PhysicalActivity)) + "
+"0","  geom_histogram()"

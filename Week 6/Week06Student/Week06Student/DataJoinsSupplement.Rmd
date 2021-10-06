@@ -1,0 +1,494 @@
+---
+title: "Week 6 Discussion Warm Ups: Data Joins"
+author: "R for Data Science"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Lock5Data)
+library(tidyverse)
+
+citytemp_long <- CityTemps %>%
+  pivot_longer(c("Moscow", "Melbourne", "San.Francisco"), 
+               names_to = "City", 
+               values_to = "Temperature")
+
+source("StateDataRCode.R")
+```
+
+# Combining Data Sets
+
+Often in data analysis projects, we need to combine information from multiple sources of data. It's very common for analysts to want to combine variables from data sets collected at different times or by different researchers. There are several different ways to do this, depending on the nature of the data. We will discuss three approaches:
+
++ adding rows
++ adding columns
++ joining data sets
+
+## Adding rows
+
+Suppose you have data on educational variables for states in the southern US. There are 13 states listed in the following data set, and for each state, we have information on the average score on the NAEP math test among 8th graders, the percent of residents who are high school graduates, the percent of residents who are college graduates, the estimated mean IQ score of residents, and the estimated school spending (in \$1000s per pupil).
+
+```{r}
+state_academic_south
+```
+
+
+We also have similar data sets containing information on each state in the north east (11 states), in the mid-west (13 states), and in the west (13 states). The same variables are measured for each region, in the same order. How can we combine the data to have a single data set for all 50 states in the US? 
+
+In this case, because the structure of variables for each data set is identical, we can just add the rows together (similar to copy-pasting additional rows in a spreadsheet):
+
+```{r}
+state_academics <- 
+  state_academic_south %>%
+  add_row(state_academic_ne) %>%
+  add_row(state_academic_mw) %>%
+  add_row(state_academic_west)
+
+# OR
+
+state_academics2 <- rbind(state_academic_south, state_academic_ne, state_academic_mw, state_academic_west)
+
+nrow(state_academics)
+nrow(state_academics2)
+```
+
+This approach works well when you are certain that each separate data set has exactly the same variables in the same order. In this case, each separate data set contains the same type of information, we simply have new cases/observations to include. 
+
+## Adding new columns
+
+Other times, we don't have new rows of data; instead we have new columns. Let's look again at our original data set about academics in the south:
+
+```{r}
+state_academic_south
+```
+
+
+What if, in addition to information on the academic and education related variables, we had a supplementary data set on health-related variables for the same states?
+
+In this case, we have the same rows (each of the 13 states in the South), but new variables to include:
+
+```{r}
+state_health_south
+```
+
+Again, it's important to note that the states all appear in exactly the same order in both data sets: Alabama, then Arkansas, then Florida, etc.
+
+All we want to do here is add new columns to our data set. We can do that with the add_column() command:
+
+```{r}
+states_south <- state_academic_south %>%
+  add_column(state_health_south)
+
+str(states_south)
+```
+
+
+We see that our new data set still has 13 rows representing the same 13 states, but we now have many more columns, including all the health columns (vegetables, fruits, etc.).
+
+There is one issue here-- did you notice that we have duplicates of the "State" and "Region" columns, since they were listed in both data sets? As a result, in the final data set, we have "State", "Region", "State.1", and "Region.1". 
+
+This is duplicate information and is unnecessary. We can use select to remove these duplicate columns from our final data set, or we can be more cautious in adding columns originally to avoid the duplicates in the first place:
+
+```{r}
+ncol(state_health_south)
+
+states_south <- state_academic_south %>%
+  add_column(state_health_south[,3:9]) # ignore State and Region columns
+
+str(states_south)
+```
+
+
+
+# Introduction to Data Joins
+
+The two preceding examples highlight ways to combine information from multiple data sets when the rows or the columns match up perfectly between data sets. However, sometimes this isn't the case. 
+
+For instance, suppose we have data on student responses to a "getting to know you" survey at the beginning of the semester (please note that this data is randomly generated-- don't expect to find any patterns here). The data here is arranged in order of when the survey responses were completed: 
+
+```{r}
+student_answers <- tribble(
+   ~ID,       ~Year,    ~Pet, ~FaveSocialMedia, ~ExerciseHours, ~VideoGameHours,
+  #-----------------------------------------------------------------------#
+  "F314",   "FirstYear",   "Yes",        "Twitter",              5,          3, 
+  "A932",  "SecondYear",    "No",           "None",             10,          3,  
+  "D893",  "SecondYear",   "Yes",         "TikTok",              0,          5,  
+  "K901",  "FourthYear",    "No",           "None",              3,          0
+)
+
+student_answers
+```
+
+
+This is interesting, and we can use it to start exploring questions such as whether pet owning students tend to get more exercise than students without pets (or vice versa). But some of our questions might involve variables that we don't have in here.
+
+What can we do then?
+
+We've learned one way to create new variables using mutate(). But mutate() only lets us create new variables based on information we already have in our data set. For instance, we could create a new variable called HobbyHours that represented the total time exercising or playing video games:
+
+```{r}
+more_student <- student_answers %>%
+  mutate(HobbyHours = ExerciseHours + VideoGameHours)
+
+more_student
+```
+
+But what if the information we want isn't in our data set at all? For instance, we might ask whether there are differences in social media preference based on students' majors/AOC. Or what about whether exercising is associated with higher (or lower) GPAs? We don't have any information on AOC or GPA in this data set, so we can't answer those questions.
+
+But we could go try to get additional data on our students. Perhaps we could get permission from the registrar's office to get some basic information about each student's academic career (with the student's permission). In this case, we might find the data is organized differently-- alphabetically, or sorted by ID number, for instance:
+
+```{r}
+# notice the students are listed in a different order here-- different source of data!
+
+student_academic <- tribble(
+  ~ID,       ~GPA,       ~Major,
+  "F314",      NA,       "Math", 
+  "D893",    3.69,    "Physics", 
+  "K901",    3.01,   "Religion", 
+  "A932",     3.01,   "Sociology"
+)
+
+student_academic
+```
+
+If it's a small data set with only four students, we could combine them by hand-- match the student ID's in each table and copy the information over. But what if we had 400 or 4000 students? 
+
+Then we would want to use a data join. __Data joins allow us to add variables from a second data set to an existing data set, by matching cases between the data sets. __ We could tell the computer to match each student up by their ID number and copy-paste the GPA and major into our original data set. The results would look something like this:
+
+```{r}
+student_full <- student_answers %>%
+  left_join(student_academic, by = "ID")
+
+student_full
+```
+
+R automatically matched the student ID's for us-- notice that the rows for the GPA and majors have changed order to match the order of the student ID in the original table. Double check the information. Does it all look correct?
+
+Our new data set has the same number of rows as the original (4 students) but we've added all the new columns from the second data set. So now we have our original 6 columns (ID, Year, Pet, FaveSocialmedia, ExerciseHours, VideoGameHours), along with 2 new columns (GPA, Major). 
+
+# Introduction to keys
+
+In the previous example, the student ID is what's called a key. __A primary key is a column or combination of columns that acts as an ID variable for a data set.__ It must uniquely identify each row in the data set. That means it must have a different value in each row. So if my data set has 400 rows, then there must be 400 different values for the primary key. 
+
+## Creating a key ID
+
+Not every data set has a key. For instance, remember our StudentSurvey data:
+
+```{r}
+head(StudentSurvey)
+```
+
+There are no ID's here. We could create one if we wanted, though it probably wouldn't be all that useful in this case:
+
+```{r}
+new_students <- StudentSurvey %>%
+  mutate(ID = row_number()) %>%
+  select(ID, everything())
+
+head(new_students)
+
+```
+
+
+## Multi-column keys
+
+It's also possible that in some data sets, we may need a combination of columns to act as a key. For example, suppose we have data on average temperatures in several cities in different months:
+
+```{r}
+head(citytemp_long)
+```
+In this case, what is our key?
+
++ There are multiple entries for each Year (so it can't be a key)
++ There are multiple entries for each Month (so it can't be a key)
++ There are multiple entries for each city (so it can't be a key)
++ There may or may not be multiple entries for each temperature... but does it make sense to think of temperature as an ID? Is each row here really defined by being a different temperature? (no)
+
+When you are in this situation, ask yourself: what does each row here represent?
+
+In this data set, each row represents a city at a particular time point (year & month). Do we have any variables that capture this information in our data set? Yes!
+
+Perhaps we can use the combination of City, Year, and Month together as a key. Each row is uniquely identified by the combination of these three variables. 
+
+Can we prove that it is unique? That is, can we verify that every row has a different combo of year, month, and city? Yes, let's check with R:
+
+```{r}
+citytemp_long %>%
+  count(Year, Month, City) %>%
+  head()
+```
+
+The new column here, n, counts the number of times that each combination of year, month, and city appears in our data set. Without printing out the entire list, can we check whether any combination is listed more than once?
+
+```{r}
+citytemp_long %>%
+  count(Year, Month, City) %>%
+  filter(n > 1)
+```
+
+Nothing! So each combination of Year, Month, and City appears exactly once. We have identified a key in our data set. 
+
+__To summarize: a key is a column or combination of columns that act as a unique ID for each row in your data set. __
+
+## Key exercises (your turn!)
+
+For each data set below, decide whether or not it has a key. Not every data set has a primary key! If there is a primary key, identify the column or columns that act as keys. If multiple columns are needed, explain what they represent and why we need them. 
+
+Note: This follows the syntax package::dataset. So Lock5Data::AllCountries refers to the AllCountries data set in the Lock5Data package. You may need to install one or more new package, and remember you can check the documentation on a data set by typing ? in front of the name of the data set. 
+
+
++ Lock5Data::AllCountries
++ Lock5Data::BaseballHits2019
++ Lock5Data::BaseballSalaries2019
++ gapminder::gapminder
++ ggplot2::diamonds
++ babynames::babynames
++ nasaweather::atmos
+
+
+# Data Joins Example: Baseball
+
+So suppose we want to combine two data sets using a join. How do we know if it's possible? Here are a couple guidelines:
+
+1. At least one of the data sets must have a key (as a UNIQUE id for each row)
+2. The other data set must include that same variable(s), even if the values aren't unique
+
+In our first example, student ID was a key in both data sets, so it clearly met both criteria.
+
+What about when the two data sets have different keys? Let's consider an example. 
+
+Recall the BaseballSalaries2019 data, which includes information on each player's salary:
+
+```{r}
+head(BaseballSalaries2019)
+```
+
+We also looked at BaseballHits2019, which contains information on hits, wins, and stats for baseball teams around the same time period. Do players on winning teams tend to make more money? 
+
+To answer this question, we need to have a data set that contains both the number of wins and the salary of the players... but right now that information is in two separate data sets!
+
+I'd like to add the team stats from BaseballHits2019 to my salary data. How can I do that?
+
+1. Look at the BaseballHits2019 data. Is there a primary key? If so, what is it?
+2. Look at the BaseballSalaries2019 data. Is the key variable from BaseballHits a variable here as well? (If so, this is called a *foreign key*)
+
+
+If you can answer "yes" to both questions, then it is probably possible to join the two data sets together. Here, we need to do a bit of cleaning first:
+
+```{r}
+# Gets rid of hidden white space that prevents matches
+BaseballHits2019$Team <- trimws(BaseballHits2019$Team)
+BaseballSalaries2019$Team <- trimws(BaseballSalaries2019$Team)
+```
+
+Ok, let's try joining our data:
+
+```{r}
+baseball_big <- BaseballSalaries2019 %>%
+  left_join(BaseballHits2019)
+
+str(baseball_big)
+```
+
+Success! Now we can visualize the relationship between wins and salary:
+
+```{r}
+ggplot(baseball_big, aes(x = Wins, y = Salary)) + 
+  geom_point()
+```
+
+Huh. Looks like there isn't actually that strong of a relationship. At least now we know?
+
+Notice something else interesting here: we were able to join the two data sets together even though they had different keys. The team was a key in the BaseballHits data, so we were able to add that to our other data set, even though the teams weren't unique in the salary data. How did R handle this? What happened when we had repeats of the same team? 
+
+Let's look at one team in particular to see how R did this:
+
+
+```{r}
+baseball_big %>%
+  filter(Team == "ATL") %>%
+  head()
+```
+
+The salary, name, and position in each row are different-- these are from the salary data. The other variables (wins, runs, etc.) are all identical across the entire team, since this is team-level data. R just repeats the values for everyone on the same team. 
+
+
+Note: There are actually some further complexities in the last example that I brushed over-- namely that the team abbreviations don't match exactly, so there are some players who have NA values for the team stats. This highlights the importance of checking your data carefully before joining it!
+
+
+# Data joins warm-ups and discussion exercises (Your turn)
+
+
+## Warm ups
+
+Let's get some more practice with miscellaneous topics regarding data joins. 
+
+#### Warm-Up 1: In the following scenarios, determine if a data join would solve the issue, or if we could use add_row() or add_column() to solve the issue, or if it isn't possible to solve the issue with the information given.
+
+a. We have one data set containing information on Sarasota temperatures for each day in 2020 (variables: date, temperature) and another data set containing the same information for each day in 2021 so far (variables: date, temperature). We'd like to combine data sets to create a time plot of temperature over time.
+
+__Your answer:__
+
+
+
+b. We have one data set containing pollution data for each data in several cities (date, city, pm2.5, pm10, ozone) and another data set containing weather data for each city on those same dates (date, city, temperature). Both data sets contain information from each data in August of this year, listed chronologically. We'd like to graph the relationship between ozone and temperature for each city. 
+
+__Your answer:__
+
+
+c. We have one data set containing information from an study about demonstration of compassion in male and female rates (see Lock5Data::CompassionateRats) and another data set containing information on a variety of species of rats (Species, AverageWeight, Habitats, Lifespan). We'd like to see if species with longer lifespans are more likely to demonstrate compassion. 
+
+__Your answer: __
+
+
+
+d. We have one data set containing data on the prevalence of k. brevis as recorded along the coastline in several cities along the gulf coast (date, city, kbrevis_count). This data was collected by volunteers and so the frequency of measurements varies (sometimes every day, but other times only one day per week). We have a second data set containing environmental data for each city recorded every day this year (date, city, air temperature, surface water temperature). We'd like to graph the relationship between k brevis count and surface water temperature for each city over time. 
+
+__Your answer:__
+
+
+
+#### Warm Up 2. Consider the following data sets:
+
+
+```{r}
+x <- tribble(
+  ~id, ~Name_group1, ~Age,
+     "110", "Angie",   3, 
+     "115", "Billy",   5, 
+     "120", "Carter",  4, 
+     "125", "Delaney", 6)
+
+y <- tribble(
+  ~id,       ~Name_group2,     ~FaveColor, 
+     "110",    "Angie",          "red", 
+     "130",     "Evie",       "orange", 
+     "135", "Fernando",       "yellow",
+     "140",   "George",        "green")
+x
+y
+
+```
+
+Without running any code, predict the output for the following commands:
+
++ left_join(x, y, by = "id")
++ left_join(y, x, by = "id")
++ right_join(y, x, by = "id")
++ inner_join(x, y, by = "id")
+
+__Your answer__
+
+
+
+#### Warm-Up 3: Suppose we run the following code. What do you think the output would be? Try to predict the results before running the code. Then run the code, explain what happened, and edit the join code to fix the issue (don't edit the data sets!). 
+
+```{r, eval = FALSE}
+students <- tribble(
+  ~Name, ~Age, ~School,
+  "Julie", 23, "UF",
+  "Reema", 18, "UCLA",
+  "Long", 21, "FSU", 
+  "Morgan", 32, "TAMU"
+)
+
+colleges <- tribble(
+  ~Abbreviation, ~Name,
+  "FSU",    "Florida State University",
+  "TAMU", "Texas A&M University",
+  "UCLA", "University of California, Los Angeles",
+  "UF", "University of Florida"
+)
+
+left_join(students, colleges)
+inner_join(students, colleges)
+```
+
+__Your answer: __
+
+
+
+
+#### Warm-Up 4: Let's practice writing our own code for data joins now. 
+
+
+#### Q4.1. Consider the HappyPlanetIndex data in the Lock5Data package. Look at the documentation. Is there a key for this data? If so, what is it?
+
+
+__Your answer:__ 
+
+
+```{r}
+
+```
+
+
+#### Q4.2. Suppose I wanted to combine the HappyPlanetIndex data with the gapminder data from earlier, so I could see if the relationship between happiness and life expectancy changed over time. Explain why this wouldn't work well. 
+
+
+__Your answer:__ 
+
+
+```{r}
+
+```
+
+
+#### Q4.3. I'm convinced that internet access leads to happiness. Unfortunately, I can't prove my argument using the HappyPlanet data, because it doesn't have any information on internet usage. Fortunately, the AllCountries data we looked at earlier does. Identify the key for AllCountries and explain how we know we can join AllCountries to HappyPlanetIndex.
+
+Hint: also consider whether to use left_join, right_join, or inner_join here.
+
+__Your answer:__ 
+
+```{r}
+
+```
+
+
+#### Q4.4: Write code to join together the HappyPlanet data and the AllCountries data, then save the resulting data set as "happy_internet". Make a graph of internet access vs happiness using this data.
+
+__Your answer:__
+
+
+```{r}
+
+```
+
+
+#### Q4.5: Use dim() and names() to explore the number and names of columns in each of the three data sets (HappyPlanetIndex, AllCountries, happy_internet). 
+
+a. Find the number of rows and columns for HappyPlanetIndex and AllCountries. 
+
+b. If you used a left join, how many rows would you expect happy_internet to have? What about an inner_join?
+
+c. Based on the information in part a, does happy_internet have the number of columns you would expect? 
+
+d. Look at the names of the variables in HappyPlanetIndex and AllCountries. Then look at the names of the variables in happy_internet. Are there any variables that have changed names, and if so, why? 
+
+
+
+__Your answer:__
+
+
+```{r, eval = FALSE}
+#starter code
+nrow(HappyPlanetIndex)
+nrow(AllCountries)
+nrow(happy_internet)
+
+
+ncol(HappyPlanetIndex)
+ncol(AllCountries)
+ncol(happy_internet) # 11  + 25 -1 
+
+
+names(HappyPlanetIndex)
+names(AllCountries)
+names(happy_internet)
+
+
+```
+
+
+

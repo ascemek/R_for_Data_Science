@@ -1,0 +1,4 @@
+"0","happy_internet <- inner_join(HappyPlanetIndex, AllCountries, by = ""Country"")"
+"0",""
+"0","ggplot(happy_internet, aes(x = Internet, y = Happiness)) + "
+"0","  geom_point()"

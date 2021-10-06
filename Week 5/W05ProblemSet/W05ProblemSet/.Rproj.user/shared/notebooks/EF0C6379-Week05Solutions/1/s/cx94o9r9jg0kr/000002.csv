@@ -1,0 +1,2 @@
+"0","ggplot(CityTemps, aes(x= Moscow, y = San.Francisco)) + "
+"0","  geom_point()"

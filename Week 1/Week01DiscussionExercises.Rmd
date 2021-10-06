@@ -1,0 +1,390 @@
+---
+title: "Week 1 Discussion Exercises"
+class: "R for Data Science"
+author: "Sami Cemek"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.align="center", out.width="80%")
+library(knitr)
+library(tidyverse)
+```
+
+# The plan for week 1
+
+- Goal: The basics of how R sees the world and how you interact with R
+- Topics: Basic Building Blocks, Sequences of Numbers, Vectors
+- All material from this week can be found in the Week 1 Learning Resources page.
+
+
+
+
+# Packages Exercises
+
+In the console, try typing
+
+```{r, eval = FALSE}
+install.packages("tidyverse")
+```
+
+to download and install the tidyverse package. This only needs to be done once.
+
+Then use the `library()` command to open the package in your current R session. You need to do this every time you restart R.
+
+```{r, eval = FALSE}
+library(tidyverse)
+```
+
+
+# Data type exercises
+
+__DTE1.__ To R, `5`, `5L`, and `"5"` are very different things.  
+
+- 1) What happens if you add 5 and 5L? What is the resulting data type? 
+- 2) What happens if you add 5L and "5"? 
+- 3) What happens if you add 5 and `TRUE`?
+- 4) What happens if you add 5 and `NA`?
+
+__Your answer:__ 
+1) It prints 10 on the console. I used typeof() function to find its type. The resulting data is a double.
+2) It gives an error that says "Error in 5L + "5" : non-numeric argument to binary operator"
+3) 5 + TRUE prints 6 on the console.
+4) It prints NA which stands for "Not Available".
+
+
+
+__DTE2 (Intermediate).__ R has an internal hierarchy of data types/modes. We will learn more about this later, but if you want to play around, see if you can predict the output of the following issues. What can you deduce about the rules of implicit coercion? 
+
+```{r}
+x <- c(4.2, "4.2")   
+typeof(x)
+print(x)
+
+x <- c(4.2, 1L)
+typeof(x)
+print(x)
+
+x <- c(TRUE, 5L)
+typeof(x)
+print(x)
+
+x <- c(TRUE, FALSE + 1)
+typeof(x)
+print(x)
+
+x <- c("a", TRUE)
+typeof(x)
+print(x)
+
+```
+
+
+# Arithmetic Exercises
+
+__AE1.__ What happens if you type in "pi" to R? What about "PI"? Are there any other constants built into R?
+
+__Your answer:__
+When I wrote pi, it printed 3.141593 on the console.
+When I wrote PI, it printed "Error: object 'PI' not found" on the console because R is case sensitive. pi and PI is different.
+The other constants built into R: LETTERS,letters, month.abb, month.name.
+
+```{r}
+pi
+
+#PI
+```
+
+
+__AE2.__ Write code to multiply 3 by 2, then add 7, then square the sum, and then divide the overall result by 5.
+
+__Your answer:__ The result is: 33.8
+
+```{r}
+x <- ((((3 * 2) + 7)^2)/5)
+x
+```
+
+
+
+__AE3.__ Use the console to complete 5-10 simple calculations in a row. What are two ways to easily retrieve or re-run earlier calculations? 
+
+__Your answer:__ Simple calculation examples: 
+1+1 = 2
+2*5 = 10
+3/6 = 0.5
+9-3 = 6
+The easier way to re-run earlier code is by pressing up button. That will bring the previous command.
+
+# Comparison Exercises (Relational and logical operators)
+
+__CE1.__ Write code to test whether an exam score `exam` is at least 80. Then replace `exam` with the student's actual test score of 85, and verify that R tells you that the statement is `TRUE`.
+
+
+__Your answer:__
+
+```{r}
+exam <- 80
+exam <- 85
+
+#compare if exam score is equal to or less than 85, if yes print TRUE
+exam >= 80
+exam
+```
+
+
+
+__CE2.__ Suppose we type `5 = 5` in the console. What happens? Why?
+
+__Your answer:__
+It prints "Error in 5 = 5 : invalid (do_set) left-hand side to assignment". We use "=" to assign variables. We can't assign an integer to an integer.
+
+
+
+__CE3.__ __Bonus:__ Suppose we type `5L != 5.0` in the console. What happens? What about `5L != 5.00000000000000001`? Why?
+
+__Your answer:__
+It returns FALSE because 5L and 5.0 is the same thing even though their data type is different. This "!=" sign means not equal to.
+Again, it return FALSE for the second statement as well. That means they are equal.
+
+__CE4.__ Suppose we are studying the effectiveness of fertilizer in growing tomatoes. We have a variable containing the fruit weight, "my_fruit". What would we use to find out if my_fruit weighed more than 100g?
+
+
+__Your answer:__ 
+We can check if my_fruit is heavier more than 100g by using comparison signs. For test purposes I will give my_fruit a value such as 120g.
+
+```{r, eval = FALSE}
+#Gave a value for test purposes
+my_fruit <- 120
+#Check if my_fruit is weight more than 100g, if yes print TRUE
+my_fruit > 100
+```
+
+
+
+__CE5.__ How could we test whether `my_fruit` weighs between 100g and 150g?
+
+```{r, eval = FALSE}
+#Check if my_fruit is weighs between 100g and 150g, if yes print TRUE
+between(my_fruit,100,150)
+```
+
+
+__Your answer:__ We will compare my_fruit with 100g and 150g. See the code above.
+
+
+__CE6 (Intermediate).__ What are two different methods for testing whether my_fruit weighs less than 150g? 
+
+__Your answer:__
+
+```{r, eval=FALSE}
+
+```
+
+
+
+__CE7 (Intermediate).__  Try running `5 | FALSE` and explain what happens. 
+
+
+__Your answer:__
+
+```{r}
+
+```
+
+
+
+# Variable name exercises
+
+__VNE1.__ Which is an appropriate variable name for the average age of a class of 6th grade students? 
+    -1) average_age_in_years
+    -2) Mean.Age
+    -3) 6_grade_age
+    -4) mean
+    -5) mean-age
+ 
+__Your answer:__
+1) YES
+2) You can use dot when naming variable but it is not recommended. It's a bad practice.
+3) NO, variable name can't start with a number.
+4) You can use mean as a variable name but there is a function called mean which might cause confusion. Therefore it is not recommended. It's a bad practice.
+5) NO, variable name should not include "-" character.
+
+   
+__VNE2.__ Which tab in RStudio lets you see all the variables that exist in your current R session?
+
+__Your answer:__ The “Environment” tab in the top right window lists the variables and functions present in the current R session.
+
+
+__VNE3 (Intermediate).__ Consider creating a variable called `x` and setting it equal to 5:
+
+```{r}
+x <- 5
+x = 5
+```
+
+Discuss why we should use the assignment operator `<-` instead of an equal sign `=`, or argue that we should use `=` to create variables. Both technically work... (this is a philosophical question more than a practical question)
+
+
+__Your answer:__
+
+
+# Sequences of Numbers
+
+SN1. Show how to use seq() and : to print the numbers from 10 down to 1. 
+
+```{r}
+seq(10,1)
+```
+
+
+SN2: Show how to use rep to print each of the following sequences:
+
+a. "orange" "orange" "orange" "blue" "blue" "blue"
+
+```{r}
+rep(c("orange","blue"), each = 3)
+```
+
+
+b. "orange" "blue" "orange" "blue" "orange" "blue"
+
+```{r}
+rep(c("orange","blue"), times = 3)
+```
+
+
+SN3. A common neurological exercise is to count backward from 100 by multiples of 7. 
+
+a. Show how to use R to calculate and print this sequence (100, 93, ..., 2) with a single line of code. 
+
+```{r}
+#This took for a while to figure out :))
+seq.int(from = 100, to = 1, by= -7)
+```
+
+
+b. (Intermediate) Modify your previous code so that both the starting number (100) and the increment (7) are variables you can change. You will be able to define those variables, and then count backwards from START by multiples of INCREMENT. This will involve 3 lines of code. 
+
+```{r}
+
+```
+
+
+# Vector exercises:
+
+A local animal rescue group is trying to track the effectiveness of their social media presence; they are currently interested in tracking follower growth. The table below summarizes the number of page likes or new followers each day:
+
+
+|         | Sun | Mon | Tues | Wed | Thurs | Fri | Sat |
+|---------|-----|-----|------|-----|-------|-----|-----|
+| FB      | 30  | 43  | 55   | 89  | 71    | 52  | 42  |
+| Twitter | 60  | 32  | 86   | 44  | 21    | 30  | 28  |
+
+__VE1.__ Create 2 vectors named `fb` and `twitter` containing the daily counts for each site. If possible, verify using code that each vector has 7 values in it.
+
+__Your answer:__
+
+```{r}
+#Create vectors
+fb <- c(30,43,55,89,71,52,42)
+twitter <- c(60,32,86,44,21,30,28)
+
+#Verify each vector has 7 values
+length(fb)
+length(twitter)
+```
+
+
+__VE2.__ Create a vector called `daysofweek` containing the names of the days of the week ("Sunday", "Monday", "Tuesday", etc.), then use the vector to assign names to the social media vectors using the `names()` function. 
+
+__Your answer:__ See the code below.
+
+```{r}
+# I created two different vectors for days of week to display both of the social medias separately 
+
+#For facebook
+daysofweek1 <- c("Sunday", "Monday", "Tuesday", "Wednesday" , "Thursday", "Friday", "Saturday")
+
+names(daysofweek1)<-fb[1:7]
+
+#For twitter
+daysofweek2 <- c("Sunday", "Monday", "Tuesday", "Wednesday" , "Thursday", "Friday", "Saturday")
+
+names(daysofweek2)<-twitter[1:7]
+
+daysofweek1
+daysofweek2
+```
+
+
+__VE3.__ Have R calculate the total new followers/likes combined on fb and twitter for each day. You should have one vector with 7 values, where each value represents the total number of new followers on FB and twitter combined. For instance, the first value equal 90, which is the total for Sunday.
+
+Your code should work even if we change the original values in `fb` or `twitter`.
+
+__Your answer:__ See the code below.
+
+```{r}
+#This vector for total new followers/likes combined on fb and twitter
+daysofweek3 <- c("Total_Sunday", "Monday", "Tuesday", "Wednesday" , "Thursday", "Friday", "Saturday")
+
+daysofweek3[1] <- fb[1] + twitter[1] #Sunday
+daysofweek3[2] <- fb[2] + twitter[2] #Monday
+daysofweek3[3] <- fb[3] + twitter[3] #Tuesday
+daysofweek3[4] <- fb[4] + twitter[4] #Wednesday
+daysofweek3[5] <- fb[5] + twitter[5] #Thursday
+daysofweek3[6] <- fb[6] + twitter[6] #Friday
+daysofweek3[7] <- fb[7] + twitter[7] #Saturday
+
+#print the values to see
+daysofweek3
+
+```
+
+
+__VE4.__ Save the total shares from the previous question in a new variable called `dailytotals` then print it out.
+
+__Your answer:__
+
+```{r}
+
+dailytotals <- daysofweek3
+dailytotals
+```
+
+
+__VE5.__ __Bonus:__ Suppose we have instagram followers for Monday through Wednesday only. If we try to add this vector to our facebook reactions, what will happen? Why?
+
+__Your answer:__
+
+```{r}
+
+```
+
+
+
+__VE6.__ Have R calculate the total number of new followers & page likes on Facebook all week. This should be a single value.
+
+__Your answer:__ 382
+
+```{r}
+#facebook
+fb_total_like <-  fb[1] + fb[2] + fb[3] + fb[4] + fb[5] + fb[6] + fb[7]
+fb_total_like
+
+#twitter (for the next question)
+twitter_total_like <-  twitter[1] + twitter[2] + twitter[3] + twitter[4] + twitter[5] + twitter[6] + twitter[7]
+twitter_total_like
+```
+
+
+__VE7.__ What about the total combined new followers on both FB and Twitter all week? You should have a single number that is the result of adding up all 14 values in the original table. Give at least 2 ways to have R calculate this using the appropriate vectors from VE1-VE6. 
+
+__Your answer:__ 683
+
+```{r}
+#Used the vectors from the previous question
+fb_total_like + twitter_total_like
+```
+
+

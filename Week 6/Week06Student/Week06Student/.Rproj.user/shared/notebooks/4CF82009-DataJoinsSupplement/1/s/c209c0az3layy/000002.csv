@@ -1,0 +1,5 @@
+"0","new_students <- StudentSurvey %>%"
+"0","  mutate(ID = row_number()) %>%"
+"0","  select(ID, everything())"
+"0",""
+"0","head(new_students)"

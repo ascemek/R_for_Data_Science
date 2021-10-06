@@ -1,0 +1,338 @@
+---
+title: "Week 06 Exercise: Data Joins"
+class: "R for Data Science"
+author: "Sami Cemek"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(tidyverse)
+
+
+# Data: heroes
+heroes <- read_csv("heroes.csv")
+powers <- read_csv("powers.csv")
+```
+
+
+# Question 1 Small Heroes Year Founded
+
+The small heroes data set contains information on a variety of comic book heroes from different publishers. We will use this data to practice joins before diving more deeply into a larger data set of superheroes. 
+
+
+
+```{r}
+
+# This data and inspiration from Jenny Bryan
+
+small_heroes <- tibble::tribble(
+       ~name, ~alignment,  ~gender,          ~publisher,
+   "Magneto",      "bad",   "male",            "Marvel",
+     "Storm",     "good", "female",            "Marvel",
+  "Mystique",      "bad", "female",            "Marvel",
+    "Batman",     "good",   "male",                "DC",
+     "Joker",      "bad",   "male",                "DC",
+  "Catwoman",      "bad", "female",                "DC",
+   "Hellboy",     "good",   "male", "Dark Horse Comics"
+  )
+
+publishers <- tibble::tribble(
+  ~publisher, ~yr_founded,
+        "DC",       1934L,
+    "Marvel",       1939L,
+     "Image",       1992L
+  )
+
+```
+
+
+#### 1a. What does the "L" in the yr_founded column of the publishers data mean?
+
+__Your answer:__ If you add L in the end of numbers, it will make variables integer, not numeric(changing its type).
+
+
+#### 1b. Using an appropriate join, add a column for year founded to the small heroes data. Choose a join that will only keep the rows containing characters from Marvel, DC, or Image. Print the new data. How many rows and columns are there?
+
+
+__Your answer:__ 
+
+STEPS
++Add a column for year founded to the small heroes data
+
+Rows = 6
+Columns = 5
+
+It removed one of the rows(Hellboy) because it's publisher is not on publishers data set and we used inner_join function.
+```{r}
+Question_1B <- small_heroes %>%
+  inner_join(publishers, small_heroes, by= c("publisher"))
+#view(Question_1B)
+Question_1B
+
+#Get Number of rows and columns
+nrow(Question_1B)
+ncol(Question_1B)
+```
+
+
+#### 1c. Using an appropriate join, add a column for year founded to the small heroes data. However, this time, choose a join that will keep all the original rows in the small_heroes data, but fill in NA for publishers' year founded if the publisher isn't listed in the publishers data. Print the new data. How many rows and columns are there?
+
+
+__Your answer:__ 
+
+STEPS
++Add a column for year founded to the small heroes data.
++Choose a join that will keep all the original rows in the small_heroes data.
++Fill in NA for publishers' year founded if the publisher isn't listed in the publishers data
+
+Rows = 7
+Columns = 5
+
+This time it kept the Hellboy row because we used left_join function.
+
+```{r}
+Question_1C <- small_heroes %>%
+  left_join(publishers, small_heroes, by= c("publisher"))
+#view(Question_1C)
+Question_1C
+
+#Get Number of rows and columns
+nrow(Question_1C)
+ncol(Question_1C)
+```
+
+
+
+#### 1d. What will the following code do? How is this result different from the earlier question answered using left_join?
+
+```{r, eval = FALSE}
+left_join(publishers, small_heroes)
+```
+
+
+__Your answer:__ 
+
+On this question the small_heroes data set joined by = "publisher" data set. Notice we put the "publisher" data set first, then "small_heroes". The order of data set is matter and we can clearly see the two data set is different.
+
+
+
+
+# Question 2 Heroes Year Founded (Full data)
+
+Let's look at the full information on heroes, contained in the "heroes" and "powers" data sets. 
+
+```{r}
+str(heroes)
+```
+
+
+We also have information on the year that some of the common publishers were founded:
+
+
+```{r}
+# Inspiration from Jenny Bryan
+
+publishers <- tibble::tribble(
+  ~publisher, ~yr_founded,
+        "DC",       1934L,
+    "Marvel",       1939L,
+     "Image",       1992L,
+"NBC Heroes",       2015L,
+"Dark Horse",       1986L
+  )
+```
+
+#### Q2a
+
+Suppose we want to add the year the publisher was founded to the heroes data. If we just try to run the following code, what happens? Why?
+
+```{r, eval = FALSE}
+#Commented out following code to knit the file.
+
+#temp <- left_join(heroes, publishers)  %>%
+#  select(name, `Eye color`, Publisher, yr_founded)
+#
+#head(temp)
+```
+
+__Your answer:__ 
+
+When we run the code above, we get an error that says: "Error: `by` must be supplied when `x` and `y` have no common variables. i use by = character()` to perform a cross-join."
+
+That means "heroes" and "publishers" data sets have a common variable and instead of using no argument we can use by argument with "publisher" variable to join them together.
+
+
+
+#### Q2b
+
+Modify the code in your join (NOT the column names) to fix the previous error, and try running the code again. Unfortunately, even though the code runs, it doesn't give the output we want. Explain the reason for the NA values.
+
+__Your answer:__ We get NA values for yr_founded because we are using left_join function and it is used when we want to keep all observations in the first table, including matching observations in the second table. Since yr_found is not matching and not on the first table it's displayed as NA.
+
+```{r}
+temp <- left_join(heroes, publishers, by= c("Publisher" = "publisher"))  %>%
+  select(name, `Eye color`, Publisher, yr_founded)
+
+temp
+#head(temp)
+```
+
+
+
+#### Q2c
+
+
+Review: Use your data wrangling skills to create a summary table showing all the publishers listed in the heroes data, as well as how many times each publisher is listed.
+
+__Your answer:__
+
+```{r}
+Q2c <- heroes %>%
+  group_by(Publisher) %>%
+  summarize(totalNum = n())
+
+#Possible another solution for this question
+#heroes %>% count(Publisher)
+
+Q2c
+```
+
+
+#### Q2d
+
+Using your new understanding from the previous exercise, modify the publishers data below to contain the correct publisher names for the heroes data set (you don't need to add any new publishers-- just get the names to match up for the ones listed below). 
+
+Then use a join to add a column for year founded to the heroes data. Your final data should only include heroes from the common publishers in the publishers data set (i.e. you should choose a join that will remove heroes who are from other publishers that are not in the publishers data). 
+
+Print out the name, eye color, publisher, and year founded for the first 6 heroes in your final data set. 
+
+__Your answer:__
+
+STEPS
++Modify the publishers data below to contain the correct publisher names for the heroes data set
+
+```{r}
+
+publishers <- tibble::tribble(
+  ~publisher, ~yr_founded,
+        "DC",       1934L,
+    "Marvel",       1939L,
+     "Image",       1992L,
+"NBC Heroes",       2015L,
+"Dark Horse",       1986L
+  )
+
+temp1 <- left_join(publishers, heroes, by= c("publisher" = "Publisher"))
+
+head(temp1)
+
+```
+
+
+
+
+
+# Question 3: Duplicate heroes
+
+
+#### Q3a
+
+
+Suppose we want to augment the heroes data with information on each hero's abilities contained in the "powers.csv" data. Is the hero's name a unique key between the data sets? Use R code to see whether each name appears exactly once in each data set.
+
+__Your answer:__ No, the hero's name can not be used as a unique key between the data sets because for some of the heroes their names used multiple times.
+
+```{r}
+#For heroes data set
+heroes %>%
+  count(name) %>%
+  filter(n > 1)
+
+#For powers data set
+powers %>%
+  count(hero_names) %>%
+  filter(n > 1)
+```
+
+
+#### Q3b
+
+
+For a subset of the heroes listed multiple times in the heroes data set (e.g., Angel and Captain Marvel), let's examine their information in more detail. Filter the heroes data to only focus on these 2 characters, and then provide an explanation for why the name has been used more than once in this subset of the data.Save the subset as angel_marvel. 
+
+
+__Your answer:__ The name for these two heroes are same but their publishers(also some other characteristic) are different so they are different characters and their name can't be used as a unique ID.
+
+```{r}
+angel_marvel <- heroes %>%
+  filter(name %in% c("Captain Marvel","Angel"))
+
+angel_marvel
+  
+```
+
+
+#### Q3c
+
+Create a subset of the powers data only including Captain Marvel and Angel. Suppose we examine the data and decide that both character powers refer to the Marvel characters. [Create a new column](https://tibble.tidyverse.org/reference/add_column.html) in the powers subset listing the correct publisher. Save this data as marvel_powers. 
+
+(FYI, if you check the powers data in detail and match it up to superherodb.com, you can try to check whether this assumption is valid. Not required for this assignment, obviously.)
+
+
+__Your answer:__
+
+```{r}
+marvel_powers <- angel_marvel %>%
+  add_column(Correct_Publisher = "Marvel")
+
+marvel_powers
+
+```
+
+
+#### Q3d
+
+For your smaller data sets (angel_marvel and marvel_powers), use the combination of hero and publisher to join the two data sets, keeping all four rows of the angel_marvel data. 
+
+What does the final result look like? Use code to verify that you have 4 rows and 177 columns. Then print the data and visually verify that the columns referring to powers for __two__ of the characters are blank (NA). 
+
+__Your answer:__ Final result looks wrong because I did a mistake on the previous question.
+
+Rows: 4
+Columns: 11
+
+```{r}
+Q3d <- inner_join(angel_marvel, marvel_powers)
+
+Q3d
+
+nrow(Q3d)
+ncol(Q3d)
+```
+
+
+
+# Question 4 (BONUS)
+
+This is an extra credit question that combines skills from data transformation and joins. It is not required, but you will get extra credit for making progress on it.
+
+Between DC and Marvel, which publisher's heroes tend to have more powers? Let's compare visually and numerically.
+
+To answer this question, you will need to:
+
++ Filter the heroes data to only include Marvel or DC. You can also eliminate the DC version of Captain Marvel.
++ Create a new variable called "num_powers" in the powers data set counting the number of powers each character has. (This is tricky; there are multiple ways to approach this. You may want to play with the rowSums() function, or see Boern's answer [here](https://stackoverflow.com/questions/28873057/sum-across-multiple-columns-with-dplyr)).
++ Join the two data sets together by character name and only keep name, publisher, and number of powers
++ Group by publisher and look at the distributions of numbers of powers within each publisher by creating summary tables (min, median, mean, max)
++ Create a graph such as a histogram or boxplot showing the numbers of powers per character for Marvel vs DC. 
++ Write a couple sentences to compare the distributions and decide if one publisher seems to have characters with more powers overall.
++ Write a couple sentences critiquing this approach. Discuss at least one major problem that prevents our code from actually measuring what we are trying to measure. 
+
+```{r}
+
+```
+
+
+

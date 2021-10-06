@@ -1,0 +1,1 @@
+"0","chicago2 <- rename(chicago, temp = tmpd, dewpt = dptp, pm25 = pm25tmean2, pm10 = pm10tmean2, ozone = o3tmean2, no2 = no2tmean2)"
