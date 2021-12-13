@@ -13,4 +13,5 @@
 *.R  	  text
 *.Rproj text
 
+linguist-detectable=true
 *.[Rr]md linguist-language=R
