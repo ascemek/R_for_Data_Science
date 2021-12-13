@@ -1,3 +1,0 @@
-"0","heroes %>%"
-"0","  count(name) %>%"
-"0","  filter(n > 1)"

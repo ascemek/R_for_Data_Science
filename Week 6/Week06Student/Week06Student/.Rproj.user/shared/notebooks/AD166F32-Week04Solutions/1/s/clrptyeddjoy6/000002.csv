@@ -1,4 +1,0 @@
-"0","chicago2 %>% "
-"0","  arrange(desc(pm25)) %>%"
-"0","  select(date, pm25) %>%"
-"0","  head(5)"

@@ -1,0 +1,209 @@
+---
+title: "Student Report (Week 07 R Markdown Demo)"
+class: "R for Data Science"
+author: "Sami Cemek"
+output: 
+  html_document:
+    code_folding: hide
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(mosaic)
+library(readr)
+
+# Import data
+file <- "CollegeScorecard2019.csv"
+college <- read_csv(file)
+
+ncf_val <- college %>%
+  filter(isNCF == TRUE)
+```
+
+## Introduction
+
+This is a brief report that explores college debt by institution and
+region for the year 2019 or 2020. We will focus on:
+
+1.  Summarizing and visualizing one numerical variable, as well as
+    interpreting the results of those summaries and graphs.
+2.  Comparing distributions of a numerical variable that has been split
+    into groups (categories) according to a second variable.
+
+Suppose you are intending to present this information at a meeting of
+other NCF students. Some students will have statistics or R knowledge
+and some won't; you want to be able to focus on the results, but still
+demonstrate transparency if anyone asks about how your code works.
+
+You also want to be able to switch between 2019 and 2020 data easily,
+since people might want to see the past year or the current year,
+depending on their interest.
+
+## Data prep
+
+The data we will be working with comes from the College Scorecard
+website, which you can access here:
+<https://collegescorecard.ed.gov/data/>. The data was updated in summer
+2019 and contains dozens of variables measured about thousands of
+colleges across the country.
+
+We have downloaded a smaller version of the data set for this week's
+report. We have focused in on a few variables, though you are welcome to
+look at the larger data set if you are interested in the topic.
+
+Even with the smaller data set, we need to do some work before we can
+start making graphs of finding numerical summaries. Here is an overview
+of the variables we will be working with.
+
+The `REGION` variable records the region of US from where each college
+or institution is located. It consists of
+
++--------------+-----------------+-------------------------------------+
+| Abbreviation | Region          | States/Areas                        |
++==============+=================+=====================================+
+| GL           | Great Lakes     | (IL, IN, MI, OH, WI)                |
++--------------+-----------------+-------------------------------------+
+| ME           | Mid East        | (DE, DC, MD, NJ, NY, PA)            |
++--------------+-----------------+-------------------------------------+
+| NE           | New England     | (CT, ME, MA, NH, RI, VT)            |
++--------------+-----------------+-------------------------------------+
+| Outlying     | Outlying Area   | (AS, FM, GU, MH, MP, PR, PW, VI)    |
++--------------+-----------------+-------------------------------------+
+| Plains       | Plains          | (IA, KS, MN, MO, NE, ND, SD)        |
++--------------+-----------------+-------------------------------------+
+| Rockies      | Rocky Mountains | (CO, ID, MT, UT, WY)                |
++--------------+-----------------+-------------------------------------+
+| SE           | Southeast       | (AL, AR, FL, GA, KY, LA, MS, NC,    |
+|              |                 | SC, TN, VA, WV)                     |
++--------------+-----------------+-------------------------------------+
+| SW           | Southwest       | (AZ, NM, OK, TX)                    |
++--------------+-----------------+-------------------------------------+
+| U.S.S.S.     | U.S. Service    |                                     |
+|              | schools         |                                     |
++--------------+-----------------+-------------------------------------+
+| West         | Far West        | (AK, CA, HI, NV, OR, WA)            |
++--------------+-----------------+-------------------------------------+
+
+In addition, we will look at three other variables as well.
+DEBT_MDN_SUPP is the median debt per institution, which has been
+suppressed for sample sizes less than 30. COSTT4_A is the annual total
+cost of attendance. RPY_3YR_RT_SUPP is the 3rd year repayment rate,
+again suppressed for small sample sizes.
+
+## Results
+
+The results section is broken into 4 sub-sections. First, we look at
+overall median debt across all schools. Then we break the analysis of
+cost down by region, take a closer look at students' abilities to repay
+their debts, and finally we examine at how NCF compares to other
+schools.
+
+### Median Debt for 2019, across all schools
+
+Let's consider the median debt at the schools in the data set. Here are
+numerical summaries and graphs for the distribution of debt. Describe
+the main features of the distribution.
+
+```{r, warning=FALSE}
+
+favstats(~DEBT_MDN_SUPP, data = college)
+gf_histogram(~DEBT_MDN_SUPP, data = college, bins = 30, fill = "steelblue", alpha = 0.8) +
+  labs(title = paste("Median Debt")) + theme_light()
+
+```
+
+### Cost by Region
+
+Let's break the analysis of cost down by region. Here are numerical
+summaries and graphs of total cost, by region. Compare the costs between
+regions. (Also pay attention to sample size!). The red line marks NCF's
+cost for comparison, which was [FILL IN NCF'S COST HERE].
+
+```{r, warning=FALSE}
+favstats(COSTT4_A ~ REGION, data = college)
+gf_boxplot(COSTT4_A ~ REGION, data = college, fill = "steelblue")%>%
+        gf_hline(color = "red", 
+                yintercept = unlist(ncf_val[1, "COSTT4_A"]), 
+                data = NA) + 
+  theme_light() + 
+  labs(title = paste("Cost by region"))
+
+
+```
+
+As we can see from the above summaries, the SouthEast (where NCF is
+located) had some of the highest costing colleges, with outliers far
+above the rest of the institutions. The schools with the overall highest
+and lowest cost in 2019 were:
+
+```{r, warning=FALSE}
+college %>%
+  filter(COSTT4_A %in% c(min(COSTT4_A, na.rm = TRUE), max(COSTT4_A, na.rm = TRUE))) %>%
+  mutate(COST = paste0("$", COSTT4_A)) %>%
+  select(INSTNM, REGION, COST) 
+```
+
+### Debt Repayment
+
+Let's consider students' ability to repay their debt within 3 years,
+broken down by region. The following show summaries and graphs to
+describe the distribution of repayment rates by region. Compare the
+regions. (Also pay attention to sample size!)
+
+The red line marks NCF's repayment rate for comparison, which was [FILL
+IN NCF'S VALUE HERE].
+
+```{r, warning=FALSE}
+favstats(RPY_3YR_RT_SUPP~REGION, data = college)
+gf_boxplot(RPY_3YR_RT_SUPP~REGION, data = college, fill = "steelblue")%>%
+        gf_hline(color = "red", 
+                yintercept = unlist(ncf_val[1, "RPY_3YR_RT_SUPP"]), 
+                data = NA) + 
+  theme_light() + 
+  labs(title = paste("3-year repayment by region"))
+
+```
+
+Here, we see a large amount of variation in the schools across all
+regions. The schools with the lowest and highest repayment rates are
+shown below:
+
+```{r, warning=FALSE}
+college %>%
+  filter(RPY_3YR_RT_SUPP %in% c(min(RPY_3YR_RT_SUPP, na.rm = TRUE), max(RPY_3YR_RT_SUPP, na.rm = TRUE))) %>%
+  mutate(REPAY_RATE = paste0(round(100*RPY_3YR_RT_SUPP,2), "%")) %>%
+  select(INSTNM, REGION, REPAY_RATE)
+```
+
+### A Closer look at New College
+
+Now look more deeply into the data. Find New College in the data set.
+Look at the 6 year median earnings and median debt. How does New College
+stack up to other schools across the country and in the Southeast?
+
+```{r, echo = FALSE, warning=FALSE}
+
+college %>%
+  filter(INSTNM == "New College of Florida") %>%
+  select(INSTNM, REGION, COSTT4_A, DEBT_MDN_SUPP, RPY_3YR_RT_SUPP) 
+
+```
+
+Let's look at the relationship between debt and cost more closely, to
+see how NCF compares. The red asterisk marks New College.
+
+```{r, warning=FALSE }
+gf_point(RPY_3YR_RT_SUPP ~ COSTT4_A, data = college, color = "steelblue", alpha = 0.8) %>%
+        gf_point(RPY_3YR_RT_SUPP ~ COSTT4_A, color = "red", shape = 8, data = ncf_val)+ 
+  theme_light() + 
+  labs(title = paste("3-year repayment vs cost"))
+```
+
+The graph shows that NCF has a lower cost and higher repayment rate than
+most colleges in the U.S.
+
+![New College of Florida All rights
+reserved.](https://image.pitchbook.com/fdR7NGmFpBsonHtc5pCs98GktXn1605394343914_200x200)

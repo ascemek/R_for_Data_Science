@@ -1,4 +1,0 @@
-"0","marvel_powers <- powers %>%"
-"0","  filter(hero_names %in% c(""Captain Marvel"", ""Angel"")) %>%"
-"0","  add_column(Publisher = ""Marvel Comics"")"
-"0","marvel_powers"

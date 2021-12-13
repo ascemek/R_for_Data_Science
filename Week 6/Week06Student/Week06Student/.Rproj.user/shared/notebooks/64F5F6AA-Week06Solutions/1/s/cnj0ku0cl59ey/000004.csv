@@ -1,3 +1,0 @@
-"0","heroes %>%"
-"0","  count(Publisher) %>%"
-"0","  arrange(desc(n))"

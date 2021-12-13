@@ -1,3 +1,0 @@
-"0","citytemp_long %>%"
-"0","  count(Year, Month, City) %>%"
-"0","  filter(n > 1)"

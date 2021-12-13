@@ -1,0 +1,343 @@
+---
+title: "Week 11 Exercises: Functions"
+class: "R for Data Science"
+author: "Sami Cemek"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(Lock5Data)
+library("ggplot2")
+```
+
+## Introduction
+
+This week we are practicing writing our own functions. We will try to create a function that calculates the linear regression coefficients for two numeric vectors. In other words, we want to find the slope and intercept in the equation:
+
+$$ \hat{y} = b_0 + b_1 x$$
+
+Here is some example data we will use:
+
+```{r}
+x1 <- c(7.8,20.6,20.2,20.6,26.5,21,5.2,10.8,21.7,17.9,22.3,18.6,12.1,28.1,12.3,25.9,12.2,11.7,9.7,10.8)
+
+y1 <- c(68,-138.3,-126.8,-106.8,-169.1,-118.4,106.1,10.5,-149.9,4.6,-131.1,-94.1,5.8,-207.5,-5.4,-232.4,34.9,-5.8,54.5,9.8)
+
+
+```
+
+
+#### Q1: Calculate the coefficients
+
+Don't worry about writing a function just yet. Recall that the formula for the simple linear regression slope is $b_1 = r * s_y / s_x$, where $r$ is the correlation and $s_y$ and $s_x$ are the standard deviation of the response and explanatory variables, respectively. The formula for the intercept is $b_0 = \bar{y} - b_1 \bar{x}$, where $\bar{y}$ and $\bar{x}$ are the sample means.
+
+a. Calculate and save the mean of x, standard deviation of x, mean of y, standard deviation of y, and the correlation. The code for the mean of x is shown below:
+
+```{r}
+# Add other stats:
+x_mean <- mean(x1)
+x_sd <- sd(x1)
+
+y_mean <- mean(y1)
+y_sd <- sd(y1)
+
+xy_correlation <- cor(x1,y1)
+
+```
+
+b. Use the variables you created in part a to calculate the regression slope and intercept. Save these as "slope" and "intercept", then print them.
+
+```{r}
+#b1 = slope = corr * (sd_y/sd_x)
+#intercept = mean_y - (slope * mean_x)
+slope <- xy_correlation * (y_sd/x_sd)
+intercept <- y_mean - (slope * x_mean)
+
+print(slope)
+print(intercept)
+```
+
+
+c. Check your calculations by comparing them to the output of the lm() function in R. 
+
+```{r}
+#YES, THEY MATCH AND THEREFORE CORRECT.
+lm(y1 ~ x1)
+```
+
+
+
+#### Q2: Draft a function
+
+a. Come up with a simple name for the linear regression function you will create (do NOT use a name that already exists in R).
+
+__Your answer:__ 
+
+It's a good practice to have a function name that is short and clearly evoke what the function does. I will use “snake_case”, where each lowercase word is separated by an underscore and name my function linear_reg.
+
+
+b. Write the code to take in a numeric explanatory vector (x) and a numeric response vector (y) as arguments, returning __a named vector__ with the intercept and slope. 
+
+(Note: you need to actually return both the intercept and slope! It's not enough to just print them). 
+
+```{r}
+
+linear_reg <- function(x,y){
+  #Argument X
+  x_mean <- mean(x)
+  x_sd <- sd(x)
+
+  #Argument Y
+  y_mean <- mean(y)
+  y_sd <- sd(y)
+
+  xy_correlation <- cor(x,y) #correlation
+  slope <- xy_correlation * (y_sd/x_sd) #slope
+  intercept <- y_mean - (slope * x_mean) #intercept
+  
+  #return a named vector with the intercept and slope. 
+  linear_reg_vector <- c(slope, intercept)
+  names(linear_reg_vector) <- c("slope", "intercept")
+  
+  return(linear_reg_vector)
+}
+
+#Test it if it's working
+linear_reg(x1,y1)
+
+
+```
+
+
+
+#### Q3: Add a graph
+
+Add a new argument to  your function, "plot_yn", which is logical. If the user sets plot_yn = TRUE, then the function will automatically print a scatterplot of x and y. If false, the function will not print a scatterplot. By default, the function should print a scatterplot (we should always plot our data!). Your function should still return the slope and intercept as it did before. 
+
+```{r}
+  linear_reg_w_graph <- function(x,y,plot_yn = TRUE){
+  #Argument X
+  x_mean <- mean(x)
+  x_sd <- sd(x)
+
+  #Argument Y
+  y_mean <- mean(y)
+  y_sd <- sd(y)
+
+  xy_correlation <- cor(x,y) #correlation
+  slope <- xy_correlation * (y_sd/x_sd) #slope
+  intercept <- y_mean - (slope * x_mean) #intercept
+  
+  #return a named vector with the intercept and slope. 
+  linear_reg_vector <- c(slope, intercept)
+  names(linear_reg_vector) <- c("slope", "intercept")
+  
+  #I'm not sure how we can graph with ggplot without putting anything for the dataset part?
+  #scatterplot <- ggplot(dataset, aes(x=x, y=y)) +  geom_point() +     geom_smooth(method = "lm")
+  
+  if(plot_yn == TRUE){
+      plot(x, y, main="Linear Regression Graph",
+      xlab="Variable X ", ylab="Variable Y ", pch=19)
+      abline(lm(y~x), col="red") # regression line (y~x)
+  }
+  
+  #abline(linear_reg_w_graph(x,y), col="red")
+  #I tried to use recursion here by using my function instead of lm() but   it caused an infinite loop error. I think it is so fun to mess with R :)
+  
+  return(linear_reg_vector)
+}
+
+#Test it if it's working
+linear_reg_w_graph(x1,y1)
+#linear_reg_w_graph(x1,y1,plot_yn = TRUE) 
+#linear_reg_w_graph(x1,y1,plot_yn = FALSE)
+```
+
+
+#### Q4: Optional: What about NA?
+
+a. Check the help files for `cor()`, `mean()`, and `sd()`. How can you tell these functions to ignore NA values? Update your function so that it will still calculate the slope and intercept even if there are NA values in the data. 
+
+```{r}
+  linear_reg_w_graph_NA <- function(x,y,plot_yn = TRUE){
+  #Argument X
+  x_mean <- mean(x, na.rm = TRUE)
+  x_sd <- sd(x, na.rm = TRUE)
+
+  #Argument Y
+  y_mean <- mean(y, na.rm = TRUE)
+  y_sd <- sd(y, na.rm = TRUE)
+
+  xy_correlation <- cor(x,y, use="complete.obs") #correlation
+  slope <- xy_correlation * (y_sd/x_sd) #slope
+  intercept <- y_mean - (slope * x_mean) #intercept
+  
+  #return a named vector with the intercept and slope. 
+  linear_reg_vector <- c(slope, intercept)
+  names(linear_reg_vector) <- c("slope", "intercept")
+  
+  if(plot_yn == TRUE){
+      plot(x, y, main="Linear Regression Graph",
+      xlab="Variable X ", ylab="Variable Y ", pch=19)
+      abline(lm(y~x), col="red") # regression line (y~x)
+  }
+  
+  return(linear_reg_vector)
+}
+
+#Test it if it's working
+linear_reg_w_graph(x1,y1)
+
+```
+
+
+b. Test that your function will still work when there are missing values. Find the slope and intercept for the following data:
+
+
+
+```{r}
+x2 <- c(7.8,NA,20.2,20.6,26.5,21,5.2,10.8,NA,17.9,22.3,18.6,12.1,28.1,12.3,25.9,12.2,11.7,9.7,10.8, NA)
+
+y2 <- c(68,-138.3,-126.8,-106.8,-169.1,-118.4,106.1,10.5,-149.9,4.6,-131.1,-94.1,5.8,-207.5,NA,-232.4,34.9,-5.8,54.5,9.8, NA)
+
+linear_reg_w_graph_NA(x2,y2)
+```
+
+c. INTERMEDIATE BONUS: In addition to making sure your code will run with NA values, have your function calculate the number of missing values for x and y. If there are missing values, print out a statement warning the user about the number of missing values. 
+
+```{r}
+
+linear_reg_w_graph_NA <- function(x,y,plot_yn = TRUE){
+  #Argument X
+  x_mean <- mean(x, na.rm = TRUE)
+  x_sd <- sd(x, na.rm = TRUE)
+
+  #Argument Y
+  y_mean <- mean(y, na.rm = TRUE)
+  y_sd <- sd(y, na.rm = TRUE)
+
+  xy_correlation <- cor(x,y, use="complete.obs") #correlation
+  slope <- xy_correlation * (y_sd/x_sd) #slope
+  intercept <- y_mean - (slope * x_mean) #intercept
+  
+  #return a named vector with the intercept and slope. 
+  linear_reg_vector <- c(slope, intercept)
+  names(linear_reg_vector) <- c("slope", "intercept")
+  
+  if(plot_yn == TRUE){
+      plot(x, y, main="Linear Regression Graph",
+      xlab="Variable X ", ylab="Variable Y ", pch=19)
+      abline(lm(y~x), col="red") # regression line (y~x)
+  }
+  
+  #Calculate the number of missing values for x and y.
+  NA_x_num <- sum(is.na(x))
+  NA_y_num <- sum(is.na(y))
+  
+  if(NA_x_num != 0){
+    warning('There are missing values for x: ', NA_x_num)
+  }
+  
+  if(NA_y_num != 0){
+    warning('There are missing values for y: ', NA_y_num)
+  }
+  
+  return(linear_reg_vector)
+}
+
+#Test it if it's working
+linear_reg_w_graph_NA(x2,y2)
+
+
+
+```
+
+
+
+
+#### Q5: Test your function
+
+Use the Happy Planet Index data and calculate the slope and intercept using Life Expectancy (X) to predict Happiness (Y). Include a scatterplot of the data.  
+
+
+```{r}
+#View(HappyPlanetIndex)
+# x= Life Expectancy
+# y= Happiness
+linear_reg_w_graph_NA(HappyPlanetIndex$LifeExpectancy,HappyPlanetIndex$Happiness)
+
+```
+
+
+
+
+#### Q6: INTERMEDIATE BONUS: Wrong data types
+
+What happens if someone tries to enter a logical vector or a factor as one of the inputs? Will the code still run? Do you want it to?
+
+Update your function to account for issues encountered with the wrong class of inputs. 
+
+Since we are using the cor() function inside our own function, R will throw some errors if the input is not numeric but we can still generalize our function by adding a few lines of code.
+
+```{r}
+linear_reg_w_graph_NA <- function(x,y,plot_yn = TRUE){
+  #Argument X
+  x_mean <- mean(x, na.rm = TRUE)
+  x_sd <- sd(x, na.rm = TRUE)
+
+  #Argument Y
+  y_mean <- mean(y, na.rm = TRUE)
+  y_sd <- sd(y, na.rm = TRUE)
+
+  xy_correlation <- cor(x,y, use="complete.obs") #correlation
+  slope <- xy_correlation * (y_sd/x_sd) #slope
+  intercept <- y_mean - (slope * x_mean) #intercept
+  
+  #return a named vector with the intercept and slope. 
+  linear_reg_vector <- c(slope, intercept)
+  names(linear_reg_vector) <- c("slope", "intercept")
+  
+  if(plot_yn == TRUE){
+      plot(x, y, main="Linear Regression Graph",
+      xlab="Variable X ", ylab="Variable Y ", pch=19)
+      abline(lm(y~x), col="red") # regression line (y~x)
+  }
+  
+  #Calculate the number of missing values for x and y.
+  NA_x_num <- sum(is.na(x))
+  NA_y_num <- sum(is.na(y))
+  
+  if(NA_x_num != 0){
+    warning('There are missing values for x: ', NA_x_num)
+  }
+  
+  if(NA_y_num != 0){
+    warning('There are missing values for y: ', NA_y_num)
+  }
+  
+  #Check if the input is a number
+  #it will throw an error if one of the inputs is: 
+  #logical vector, factor, string
+  
+  if((is.na(as.numeric(x)) && is.na(as.numeric(y))) && !FALSE && !TRUE){
+    print("Your input should be a number")
+    warning('Your input should be a number')
+  }
+  return(linear_reg_vector)
+}
+
+#Test it if it's working
+
+x4 <- c(TRUE,TRUE,FALSE,TRUE,FALSE,FALSE)
+
+x3 <- c("a","b","c","d","e","f","g","h","j","k","l")
+
+#linear_reg_w_graph_NA(x3,y2)
+```
+
+
+
+
+
+

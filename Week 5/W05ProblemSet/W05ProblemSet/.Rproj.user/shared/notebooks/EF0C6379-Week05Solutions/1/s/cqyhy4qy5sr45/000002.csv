@@ -1,5 +1,0 @@
-"0","TidyTemps <- CityTemps %>%"
-"0","  pivot_longer(cols = c(Moscow, Melbourne, San.Francisco), "
-"0","               names_to = ""City"", "
-"0","               values_to = ""Temperature"")"
-"0","head(TidyTemps)"

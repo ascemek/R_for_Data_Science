@@ -1,2 +1,0 @@
-"0","ggplot(baseball_big, aes(x = Wins, y = Salary)) + "
-"0","  geom_point()"

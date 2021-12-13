@@ -1,4 +1,0 @@
-"0","temp <- left_join(heroes, publishers, by = c(""Publisher"" = ""publisher""))  %>%"
-"0","  select(name, `Eye color`, Publisher, yr_founded)"
-"0",""
-"0","head(temp)"

@@ -1,5 +1,0 @@
-"0","baseball_big <- BaseballSalaries2015 %>%"
-"0","  left_join(BaseballHits)"
-"2","Joining, by = ""Team""
-"
-"0","#str(baseball_big)"

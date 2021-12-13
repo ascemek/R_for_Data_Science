@@ -1,3 +1,0 @@
-"0","ggplot(h3, aes(x = Publisher, y = num_powers)) + "
-"0","  geom_boxplot() + "
-"0","  coord_flip()"

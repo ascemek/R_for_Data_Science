@@ -1,1 +1,0 @@
-"0","x = left_join(HappyPlanetIndex, gapminder, by = c(""Country"" = ""country""))"

@@ -1,5 +1,0 @@
-"0","temp <- left_join(heroes, publishers)  %>%"
-"0","  select(name, `Eye color`, Publisher, yr_founded)"
-"2","Error: `by` must be supplied when `x` and `y` have no common variables.
-[34mℹ[39m use by = character()` to perform a cross-join.
-"

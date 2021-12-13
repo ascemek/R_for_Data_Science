@@ -1,4 +1,0 @@
-"0","small_heroes %>%"
-"0","  inner_join(publishers)"
-"2","Joining, by = ""publisher""
-"
